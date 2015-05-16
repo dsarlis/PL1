@@ -1,0 +1,7 @@
+Instructions for generator:
+
+- Compile generator: (ocamlc generator.ml -o generator)
+- Have the "drive" executable in the same folder
+- chmod +x test.sh
+- ./test.sh 
+# Tests output files with diff

@@ -1,0 +1,148 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+
+typedef struct roadStruct {
+	int number;
+	int limit;
+} roadType;
+
+typedef struct tripStruct {
+	int speed;
+	int change;
+	roadType *pstate;
+	struct tripStruct *prev;
+} tripType;
+
+unsigned int pieces = 0;
+
+roadType *readFile (char *input)
+{	
+	FILE *fpin;
+	unsigned int x = 0;
+	int y = 0;
+	roadType *array = NULL,*ptr = NULL;	
+
+	fpin = fopen(input,"r");
+	while (fscanf(fpin,"%d %d", &x,&y) != EOF){
+		if ((x!=0) || (y!=0)){
+			pieces += x;
+		}
+	}
+	fclose(fpin);
+	array = (roadType *)malloc((pieces+2)*sizeof(roadType));
+	ptr=array;
+	ptr->number=0;
+	ptr->limit=0;
+	ptr++;
+	fpin = fopen(input,"r");
+	while (fscanf(fpin,"%d %d", &x,&y) != EOF){
+                if ((x!=0) || (y!=0)){
+		   while (x>0) {
+			ptr->number = x;
+			ptr->limit = y;
+			ptr++;
+			x--;
+		   }		
+		}
+	}
+	ptr->number = 100000;
+        ptr->limit = 10000000;	
+	fclose(fpin);
+	return array;
+}
+
+
+int length (tripType *p){
+	tripType *ptr = p;
+	int i = 0;
+	
+	while(ptr!=NULL){
+		i++;
+		ptr = ptr->prev;
+	}
+	return i;
+}
+
+int best_moves(int a,int s, roadType *p){
+	int current_speed = 0,test = 0,exit1 = 0,exit2=0,moves = 0;
+	roadType * ptr = NULL, *temp=NULL;
+	tripType *head = NULL,*l = NULL, *garbage = NULL;
+	
+
+	ptr = temp = p;
+	test = a;
+	while(exit2==0) {
+		exit1 = 0;
+		moves = test/10;
+		while ((exit1 == 0) && (test >= (current_speed+s))){
+			if ((test <= ((ptr+1)->limit))){
+				if(((ptr+moves)>p+pieces+1)){
+					test -= 10;
+					moves = test/10;
+				}
+				else {
+				if (moves<=(ptr+1)->number){
+					exit1=1;
+					l = (tripType *)malloc(sizeof(tripType));
+					l->speed = current_speed;
+                                        l->change = test - current_speed;
+                                        l->pstate = temp;
+               			        if (head==NULL)
+                        			head = l;
+                			else {
+                    				l->prev = head;
+                    				head = l;
+                			}
+					temp = ptr + moves;
+					ptr += moves;
+					current_speed = test;
+					test = current_speed + a;	
+				}
+				else {
+					moves = moves - (ptr+1)->number;
+					ptr += (ptr+1)->number;
+				}
+				}
+			}
+			else{
+				test -= 10;
+				ptr = temp;
+				moves = test/10;
+			} 
+		}
+		if (test<current_speed+s){
+			garbage = head;
+			ptr = head->pstate;
+			head->change -= 10;
+			test = head->speed + head->change;
+			current_speed = head->speed;
+			temp = ptr;
+			head = head->prev;
+			free(garbage);
+		}
+		if (ptr > p + pieces) 
+			exit2 = 1;		
+	}
+	return length(head);	
+	
+}
+
+int main(int argc, char* argv[])
+{
+   int acc,slowdown;
+   roadType *head=NULL;
+
+
+   if (argc!= 4) {
+	printf("Usage: drive acc slowdown input.txt");
+	return 1;
+   }
+   
+   acc = atoi(argv[1]);
+   slowdown = -atoi(argv[2]);
+   head = readFile(argv[3]);
+   printf("%d\n",best_moves(acc,slowdown,head));
+
+   return 0;
+}

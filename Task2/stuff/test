@@ -1,0 +1,31 @@
+#!/bin/bash
+
+for i in {1..10}
+do 
+  echo "Running small $i"
+  ./debate small/case$i.txt >a.txt
+  if (diff a.txt me/small$i.txt)
+	then echo "Same"
+	else echo "Different"
+  fi
+done
+
+for i in {1..10}
+do 
+  echo "Running medium $i"
+  ./debate medium/case$i.txt >a.txt
+  if (diff a.txt me/medium$i.txt)
+	then echo "Same"
+	else echo "Different"
+  fi
+done
+
+for i in {1..10}
+do 
+  echo "Running large $i"
+  ./debate large/case$i.txt >a.txt
+  if (diff a.txt me/large$i.txt)
+	then echo "Same"
+	else echo "Different"
+  fi
+done

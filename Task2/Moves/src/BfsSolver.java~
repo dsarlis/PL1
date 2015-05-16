@@ -1,0 +1,46 @@
+import java.util.*;
+
+
+public class BfsSolver implements ISolver{
+		
+		public BfsSolver (){}
+				
+		public int solve(IState initialState){
+			
+			Map<IState,IState> visited = new HashMap<IState,IState>();
+			List<IState> fringe = new LinkedList<IState>();
+			List<IState> nextFringe = new LinkedList<IState>();
+			
+			visited.put(initialState, null);
+			fringe.add(initialState);
+			
+			while (true){
+				for (IState currState : fringe){
+					if (currState.isWinning()){
+						IState s = currState;
+						Deque<IState> path = new LinkedList<IState>();
+						
+						while (s != null){
+							//s.print();
+							path.addFirst(s);
+							s = visited.get(s);
+						}
+						
+						return path.size()-1;
+						
+					}
+					Set <IState> nextStates = currState.nextStates();
+					for (IState s : nextStates)
+						if (!visited.containsKey(s)&&!s.exclude()){
+							nextFringe.add(s);
+							visited.put(s, currState);
+						}
+					
+				}
+				if (nextFringe.isEmpty())
+					return -1;
+				fringe = nextFringe;
+				nextFringe = new LinkedList<IState>();
+			}
+		}
+}
